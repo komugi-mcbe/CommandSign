@@ -1,6 +1,6 @@
 <?php
 
-namespace xtakumatutix\mss;
+namespace xtakumatutix\cmdsign;
 
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
@@ -8,7 +8,6 @@ use pocketmine\block\Block;
 use pocketmine\level\Level;
 use pocketmine\tile\Tile;
 use pocketmine\tile\Sign;
-use onebone\economyapi\EconomyAPI;
 
 class EventListener implements Listener 
 {
@@ -22,21 +21,11 @@ class EventListener implements Listener
     public function onTap(PlayerInteractEvent $event)
     {
         $player = $event->getPlayer();
-        $level = $player->getLevel();
-        $levelname = $level->getName();
-        $block = $event->getBlock();
-        $tile = $level->getTile($block);
+        $tile = $event->getBlock()->getLevel()->getTile($event->getBlock());
         if ($tile instanceof Sign) {
-            if ($levelname == 'lobby') {
-                if ($tile->getLine(0) == '- MoneySee -') {
-                    $name = $player->getName();
-                    $money = EconomyAPI::getInstance()->myMoney($name);
-                    $tile->setLine(1, "§b".$name."§eさん");
-                    $tile->setLine(2, "§e所持金");
-                    $tile->setLine(3, "§f".$money."§6K§eG");
-                    $tile->saveNBT();
-                    $player->sendMessage(' §a>> §f看板を書き換えたよ！アピールしよう！');
-                }
+            if ($tile->getLine(0) == 'cmd') {
+                $cmd = $tile->getLine(1);
+                $this->Main->getServer()->dispatchCommand($player, $cmd);
             }
         }
     }
